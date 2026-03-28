@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Server</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>Media Server</h1>
+      <span id="file-count" class="badge">0 files</span>
+    </div>
+    <div class="header-right">
+      <input type="text" id="search" placeholder="Search files..." />
+      <button id="btn-scan" title="Re-scan media directories">Scan</button>
+      <button id="btn-info" title="Server info">Info</button>
+    </div>
+  </header>
+
+  <nav class="filter-bar">
+    <button class="filter active" data-type="">All</button>
+    <button class="filter" data-type="video">Videos</button>
+    <button class="filter" data-type="audio">Audio</button>
+    <button class="filter" data-type="image">Images</button>
+  </nav>
+
+  <main id="gallery"></main>
+
+  <!-- Media Player Modal -->
+  <div id="player-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <div id="player-container"></div>
+      <div class="player-info">
+        <h2 id="player-title"></h2>
+        <p id="player-meta"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Modal -->
+  <div id="info-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-small">
+      <button class="modal-close">&times;</button>
+      <h2>Server Info</h2>
+      <div id="info-content"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
