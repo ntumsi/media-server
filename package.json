@@ -5,9 +5,15 @@
   "license": "MIT",
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "test": "jest"
   },
-  "keywords": ["media", "server", "streaming", "dlna"],
+  "keywords": [
+    "media",
+    "server",
+    "streaming",
+    "dlna"
+  ],
   "author": "",
   "description": "Local network media server for streaming video, audio, and images",
   "dependencies": {
@@ -15,5 +21,9 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }

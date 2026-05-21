@@ -11,23 +11,6 @@ const infoContent = document.getElementById('info-content');
 let currentFilter = '';
 let currentSearch = '';
 
-// --- Utilities ---
-function formatSize(bytes) {
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
-}
-
-function typeIcon(type) {
-  switch (type) {
-    case 'video': return '\u{1F3AC}';
-    case 'audio': return '\u{1F3B5}';
-    case 'image': return '\u{1F5BC}';
-    default: return '\u{1F4C1}';
-  }
-}
-
 // --- API ---
 async function fetchFiles() {
   const params = new URLSearchParams();
@@ -64,44 +47,53 @@ function renderGallery(data) {
     return;
   }
 
-  gallery.innerHTML = data.files.map(file => `
-    <div class="media-card" data-id="${file.id}" data-type="${file.type}">
-      <div class="thumb">
-        ${file.type === 'image'
-          ? `<img src="/api/thumbnail/${file.id}" alt="${file.name}" loading="lazy" />`
-          : `<span class="icon">${typeIcon(file.type)}</span>`
-        }
-      </div>
-      <div class="card-info">
-        <div class="name" title="${file.name}">${file.name}</div>
-        <div class="meta">
-          <span class="type-badge ${file.type}">${file.type}</span>
-          <span>${formatSize(file.size)}</span>
+  gallery.innerHTML = data.files.map(file => {
+    const safeName = escapeHtml(file.name);
+    const safeId = escapeAttr(file.id);
+    const safeType = escapeAttr(file.type);
+    return `
+      <div class="media-card" data-id="${safeId}" data-type="${safeType}">
+        <div class="thumb">
+          ${file.type === 'image'
+            ? `<img src="/api/thumbnail/${encodeURIComponent(file.id)}" alt="${safeName}" loading="lazy" />`
+            : `<span class="icon">${typeIcon(file.type)}</span>`
+          }
+        </div>
+        <div class="card-info">
+          <div class="name" title="${safeName}">${safeName}</div>
+          <div class="meta">
+            <span class="type-badge ${safeType}">${safeType}</span>
+            <span>${formatSize(file.size)}</span>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderInfo(info) {
+  const port = escapeHtml(info.network.port);
   const urls = info.network.urls.length > 0
-    ? info.network.urls.map(u => `<a href="${u}" target="_blank">${u}</a>`).join('')
-    : `<a href="http://localhost:${info.network.port}">http://localhost:${info.network.port}</a>`;
+    ? info.network.urls.map(u => {
+        const safeUrl = escapeAttr(u);
+        return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(u)}</a>`;
+      }).join('')
+    : `<a href="http://localhost:${port}">http://localhost:${port}</a>`;
 
   infoContent.innerHTML = `
     <table>
-      <tr><td>Hostname</td><td>${info.network.hostname}</td></tr>
-      <tr><td>Port</td><td>${info.network.port}</td></tr>
-      <tr><td>Total Files</td><td>${info.totalFiles}</td></tr>
-      <tr><td>Videos</td><td>${info.counts.video}</td></tr>
-      <tr><td>Audio</td><td>${info.counts.audio}</td></tr>
-      <tr><td>Images</td><td>${info.counts.image}</td></tr>
+      <tr><td>Hostname</td><td>${escapeHtml(info.network.hostname)}</td></tr>
+      <tr><td>Port</td><td>${port}</td></tr>
+      <tr><td>Total Files</td><td>${escapeHtml(info.totalFiles)}</td></tr>
+      <tr><td>Videos</td><td>${escapeHtml(info.counts.video)}</td></tr>
+      <tr><td>Audio</td><td>${escapeHtml(info.counts.audio)}</td></tr>
+      <tr><td>Images</td><td>${escapeHtml(info.counts.image)}</td></tr>
     </table>
     <h3 style="margin-top:16px;font-size:0.9rem;">Access from other devices:</h3>
     <div class="url-list">${urls}</div>
     <h3 style="margin-top:16px;font-size:0.9rem;">Media Directories:</h3>
     <div style="font-size:0.8rem;color:#888;margin-top:4px;">
-      ${info.mediaDirs.map(d => `<div>${d}</div>`).join('')}
+      ${info.mediaDirs.map(d => `<div>${escapeHtml(d)}</div>`).join('')}
     </div>
   `;
 }
@@ -109,23 +101,25 @@ function renderInfo(info) {
 // --- Player ---
 function openPlayer(file) {
   let content = '';
-  const streamUrl = `/api/stream/${file.id}`;
+  const streamUrl = `/api/stream/${encodeURIComponent(file.id)}`;
+  const safeName = escapeHtml(file.name);
+  const safeMime = escapeAttr(file.mimeType);
 
   switch (file.type) {
     case 'video':
-      content = `<video controls autoplay><source src="${streamUrl}" type="${file.mimeType}">Your browser does not support video playback.</video>`;
+      content = `<video controls autoplay><source src="${streamUrl}" type="${safeMime}">Your browser does not support video playback.</video>`;
       break;
     case 'audio':
-      content = `<audio controls autoplay><source src="${streamUrl}" type="${file.mimeType}">Your browser does not support audio playback.</audio>`;
+      content = `<audio controls autoplay><source src="${streamUrl}" type="${safeMime}">Your browser does not support audio playback.</audio>`;
       break;
     case 'image':
-      content = `<img src="${streamUrl}" alt="${file.name}" />`;
+      content = `<img src="${streamUrl}" alt="${safeName}" />`;
       break;
   }
 
   playerContainer.innerHTML = content;
   playerTitle.textContent = file.name;
-  playerMeta.textContent = `${file.type} \u2022 ${formatSize(file.size)} \u2022 ${file.relativePath}`;
+  playerMeta.textContent = `${file.type} • ${formatSize(file.size)} • ${file.relativePath}`;
   playerModal.classList.remove('hidden');
 }
 
