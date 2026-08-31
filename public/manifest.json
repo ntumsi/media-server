@@ -1,0 +1,16 @@
+{
+  "name": "Media Server",
+  "short_name": "Media",
+  "description": "Local network media server",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
